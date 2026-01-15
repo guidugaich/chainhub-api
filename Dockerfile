@@ -13,6 +13,7 @@ FROM alpine:3.19
 WORKDIR /app
 
 COPY --from=builder /bin/chainhub-api /app/chainhub-api
+COPY --from=builder /app/migrations /app/migrations
 
 EXPOSE 8080
 

@@ -14,19 +14,35 @@ type Config struct {
 	DBUser    string
 	DBPassword string
 	DBName    string
+	DBSSLMode string
 	JWTSecret string
+	MigrationsPath string
+	RunMigrations  bool
 }
 
 func Load() (Config, error) {
+	appEnv := envOrDefault("APP_ENV", "development")
+	dbSSLMode := os.Getenv("DB_SSLMODE")
+	if dbSSLMode == "" {
+		if appEnv == "production" {
+			dbSSLMode = "require"
+		} else {
+			dbSSLMode = "disable"
+		}
+	}
+
 	cfg := Config{
-		AppEnv:    envOrDefault("APP_ENV", "development"),
+		AppEnv:    appEnv,
 		Port:      intOrDefault("PORT", 8080),
 		DBHost:    envOrDefault("DB_HOST", "localhost"),
 		DBPort:    intOrDefault("DB_PORT", 5432),
 		DBUser:    envOrDefault("DB_USER", "chainhub"),
 		DBPassword: envOrDefault("DB_PASSWORD", "chainhub"),
 		DBName:    envOrDefault("DB_NAME", "chainhub"),
+		DBSSLMode: dbSSLMode,
 		JWTSecret: envOrDefault("JWT_SECRET", ""),
+		MigrationsPath: envOrDefault("MIGRATIONS_PATH", "file://migrations"),
+		RunMigrations:  boolOrDefault("RUN_MIGRATIONS", true),
 	}
 
 	if cfg.JWTSecret == "" {
@@ -46,6 +62,16 @@ func envOrDefault(key, fallback string) string {
 func intOrDefault(key string, fallback int) int {
 	if value := os.Getenv(key); value != "" {
 		parsed, err := strconv.Atoi(value)
+		if err == nil {
+			return parsed
+		}
+	}
+	return fallback
+}
+
+func boolOrDefault(key string, fallback bool) bool {
+	if value := os.Getenv(key); value != "" {
+		parsed, err := strconv.ParseBool(value)
 		if err == nil {
 			return parsed
 		}

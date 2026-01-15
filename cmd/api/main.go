@@ -23,6 +23,12 @@ func main() {
 	}
 	defer dbConn.Close()
 
+	if cfg.RunMigrations {
+		if err := db.RunMigrations(dbConn, cfg.MigrationsPath); err != nil {
+			log.Fatalf("migration error: %v", err)
+		}
+	}
+
 	handler := handlers.New(dbConn, cfg)
 	router := apihttp.NewRouter(handler)
 

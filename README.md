@@ -52,7 +52,10 @@ The API reads configuration from environment variables:
 - `DB_USER` (default: `chainhub`)
 - `DB_PASSWORD` (default: `chainhub`)
 - `DB_NAME` (default: `chainhub`)
+- `DB_SSLMODE` (default: `disable`)
 - `JWT_SECRET` (required)
+- `RUN_MIGRATIONS` (default: `true`)
+- `MIGRATIONS_PATH` (default: `file://migrations`)
 
 `docker-compose.yml` already supplies these for local dev.
 
