@@ -1,0 +1,43 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENV=development
+      - PORT=8080
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=chainhub
+      - DB_PASSWORD=chainhub
+      - DB_NAME=chainhub
+      - JWT_SECRET=change-me
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=chainhub
+      - POSTGRES_PASSWORD=chainhub
+      - POSTGRES_DB=chainhub
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./migrations:/migrations:ro
+
+  migrate:
+    image: migrate/migrate:v4.17.1
+    depends_on:
+      - db
+    volumes:
+      - ./migrations:/migrations
+    entrypoint: [
+      "migrate",
+      "-path=/migrations",
+      "-database=postgres://chainhub:chainhub@db:5432/chainhub?sslmode=disable"
+    ]
+
+volumes:
+  db_data:
