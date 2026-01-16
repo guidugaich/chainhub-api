@@ -18,6 +18,7 @@ type Config struct {
 	JWTSecret string
 	MigrationsPath string
 	RunMigrations  bool
+	FrontendURL    string
 }
 
 func Load() (Config, error) {
@@ -43,6 +44,7 @@ func Load() (Config, error) {
 		JWTSecret: envOrDefault("JWT_SECRET", ""),
 		MigrationsPath: envOrDefault("MIGRATIONS_PATH", "file://migrations"),
 		RunMigrations:  boolOrDefault("RUN_MIGRATIONS", true),
+		FrontendURL:    envOrDefault("FRONTEND_URL", "http://localhost:3000"),
 	}
 
 	if cfg.JWTSecret == "" {

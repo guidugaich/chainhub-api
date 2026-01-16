@@ -15,7 +15,7 @@ func NewRouter(handler *handlers.Handler) http.Handler {
 	r.Use(chimw.RequestID)
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
-	r.Use(authmw.CORS("http://localhost:3000"))
+	r.Use(authmw.CORS(handler.Config.FrontendURL))
 
 	r.Post("/signup", handler.Signup)
 	r.Post("/login", handler.Login)
