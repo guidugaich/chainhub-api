@@ -93,20 +93,18 @@ func (h *Handler) ListLinks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	treeIDParam := r.URL.Query().Get("tree_id")
-	if treeIDParam == "" {
-		writeError(w, http.StatusBadRequest, "tree_id is required")
+	username := strings.TrimSpace(r.URL.Query().Get("username"))
+	if username == "" {
+		writeError(w, http.StatusBadRequest, "username is required")
 		return
 	}
 
-	treeID, err := strconv.ParseInt(treeIDParam, 10, 64)
-	if err != nil || treeID <= 0 {
-		writeError(w, http.StatusBadRequest, "tree_id must be a positive integer")
-		return
-	}
-
-	links, err := repo.ListLinksByTreeIDAndUser(h.DB, treeID, userID)
+	links, err := repo.ListLinksByUsernameAndUser(h.DB, username, userID)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "tree not found")
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "failed to load links")
 		return
 	}
