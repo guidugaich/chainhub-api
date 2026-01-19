@@ -51,6 +51,8 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("JWT_SECRET is required")
 	}
 
+	fmt.Printf("Loaded config: %+v\n", cfg)
+
 	return cfg, nil
 }
 
