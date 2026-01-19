@@ -161,7 +161,7 @@ func UpdateLinkByIDAndUser(db *sql.DB, linkID, userID int64, title, url string, 
 	var link models.Link
 	err := db.QueryRow(
 		`UPDATE links l
-		 SET title = $1, url = $2, position = $3, is_active = $4
+		 SET title = $1, url = $2, position = $3, is_active = $4, updated_at = NOW()
 		 FROM trees t
 		 WHERE l.tree_id = t.id AND l.id = $5 AND t.user_id = $6
 		 RETURNING l.id, l.tree_id, l.title, l.url, l.position, l.is_active, l.created_at`,
