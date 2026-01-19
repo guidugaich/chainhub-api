@@ -14,7 +14,6 @@ import (
 )
 
 type createLinkRequest struct {
-	TreeID   int64  `json:"tree_id"`
 	Title    string `json:"title"`
 	URL      string `json:"url"`
 	Position int    `json:"position"`
@@ -45,25 +44,10 @@ func (h *Handler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.TreeID <= 0 {
-		writeError(w, http.StatusBadRequest, "tree_id is required")
-		return
-	}
-
 	title := strings.TrimSpace(req.Title)
 	url := strings.TrimSpace(req.URL)
 	if title == "" || url == "" {
 		writeError(w, http.StatusBadRequest, "title and url are required")
-		return
-	}
-
-	ownsTree, err := repo.TreeBelongsToUser(h.DB, req.TreeID, userID)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to validate tree")
-		return
-	}
-	if !ownsTree {
-		writeError(w, http.StatusNotFound, "tree not found")
 		return
 	}
 
@@ -72,8 +56,12 @@ func (h *Handler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		isActive = *req.IsActive
 	}
 
-	link, err := repo.CreateLink(h.DB, req.TreeID, title, url, req.Position, isActive)
+	link, err := repo.CreateLinkByUser(h.DB, userID, title, url, req.Position, isActive)
 	if err != nil {
+		if errors.Is(err, repo.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "tree not found")
+			return
+		}
 		writeError(w, http.StatusInternalServerError, "failed to create link")
 		return
 	}

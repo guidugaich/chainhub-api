@@ -51,6 +51,29 @@ func CreateLink(db *sql.DB, treeID int64, title, url string, position int, isAct
 	return link, nil
 }
 
+func CreateLinkByUser(db *sql.DB, userID int64, title, url string, position int, isActive bool) (models.Link, error) {
+	var link models.Link
+	err := db.QueryRow(
+		`INSERT INTO links (tree_id, title, url, position, is_active)
+		 SELECT t.id, $2, $3, $4, $5
+		 FROM trees t
+		 WHERE t.user_id = $1
+		 RETURNING id, tree_id, title, url, position, is_active, created_at`,
+		userID,
+		title,
+		url,
+		position,
+		isActive,
+	).Scan(&link.ID, &link.TreeID, &link.Title, &link.URL, &link.Position, &link.IsActive, &link.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.Link{}, ErrNotFound
+		}
+		return models.Link{}, err
+	}
+	return link, nil
+}
+
 func ListLinksByTreeIDAndUser(db *sql.DB, treeID, userID int64) ([]models.Link, error) {
 	rows, err := db.Query(
 		`SELECT l.id, l.tree_id, l.title, l.url, l.position, l.is_active, l.created_at
