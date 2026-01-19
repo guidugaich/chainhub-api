@@ -13,7 +13,8 @@ services:
       - DB_NAME=chainhub
       - JWT_SECRET=change-me
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
@@ -26,11 +27,20 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./migrations:/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chainhub -d chainhub"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
 
   migrate:
     image: migrate/migrate:v4.17.1
+    profiles:
+      - migrate
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./migrations:/migrations
     entrypoint: [

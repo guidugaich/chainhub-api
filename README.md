@@ -32,8 +32,8 @@ Backend for the ChainHub link-in-bio platform. This project is intentionally sma
    - `go mod tidy`
 3. Start the services:
    - `docker compose up --build`
-4. Apply the schema:
-   - `docker compose run --rm migrate up`
+4. Migrations run automatically on startup. To run them manually:
+   - `docker compose --profile migrate run --rm migrate up`
 
 ## Reset the database (ephemeral workflow)
 
@@ -61,9 +61,9 @@ The API reads configuration from environment variables:
 
 ## Migrations
 
-Use the `migrate` CLI via Docker Compose:
+Use the `migrate` CLI via Docker Compose (optional; the API runs migrations by default):
 
-- Apply all: `docker compose run --rm migrate up`
+- Apply all: `docker compose --profile migrate run --rm migrate up`
 - Roll back one: `docker compose run --rm migrate down 1`
 - Create new migration: `docker compose run --rm migrate create -ext sql -dir /migrations -seq add_feature`
 
