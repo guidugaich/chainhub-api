@@ -21,6 +21,14 @@ type Config struct {
 	FrontendURL    string
 }
 
+func (c Config) Redacted() Config {
+	redacted := c
+	// Add new sensitive fields here to keep logs safe.
+	redacted.DBPassword = obfuscate(redacted.DBPassword)
+	redacted.JWTSecret = obfuscate(redacted.JWTSecret)
+	return redacted
+}
+
 func Load() (Config, error) {
 	appEnv := envOrDefault("APP_ENV", "development")
 	dbSSLMode := os.Getenv("DB_SSLMODE")
@@ -51,7 +59,7 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("JWT_SECRET is required")
 	}
 
-	fmt.Printf("Loaded config: %+v\n", cfg)
+	fmt.Printf("Loaded config: %+v\n", cfg.Redacted())
 
 	return cfg, nil
 }
@@ -81,4 +89,11 @@ func boolOrDefault(key string, fallback bool) bool {
 		}
 	}
 	return fallback
+}
+
+func obfuscate(value string) string {
+	if value == "" {
+		return ""
+	}
+	return "****"
 }
